@@ -6,14 +6,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RestAspNet5.Services.Implementations
+namespace RestAspNet5.Repository.Implementations
 {
-    public class PersonServiceImplementation : IPersonService
+    public class PersonRepositoryImplementation : IPersonRepository
     {
         //private volatile int count;
 
         private MySqlContext _context;
-        public PersonServiceImplementation(MySqlContext context)
+        public PersonRepositoryImplementation(MySqlContext context)
         {
             _context = context;
         }
@@ -92,7 +92,7 @@ namespace RestAspNet5.Services.Implementations
 
         }
 
-        private bool Exists(long id)
+        public bool Exists(long id)
         {
             return _context.Persons.Any(p => p.Id.Equals(id));
         }

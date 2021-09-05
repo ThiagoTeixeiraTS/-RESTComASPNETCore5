@@ -9,11 +9,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using RestAspNet5.Model.Context;
-using RestAspNet5.Services.Implementations;
+using RestAspNet5.Business.Implementations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using RestAspNet5.Repository.Implementations;
 
 namespace RestAspNet5
 {
@@ -38,7 +39,8 @@ namespace RestAspNet5
             services.AddApiVersioning();
 
             //injeção de dependencia!
-            services.AddScoped<IPersonService, PersonServiceImplementation>();
+            services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
+            services.AddScoped<IPersonRepository, PersonRepositoryImplementation>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
