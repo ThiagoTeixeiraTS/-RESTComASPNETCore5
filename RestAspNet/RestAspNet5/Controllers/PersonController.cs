@@ -2,18 +2,15 @@
 using Microsoft.Extensions.Logging;
 using RestAspNet5.Model;
 using RestAspNet5.Services.Implementations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace RestAspNet5.Controllers
 {
+    [ApiVersion("1")]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class PersonController : ControllerBase
     {
-   
+
 
         private readonly ILogger<PersonController> _logger;
         private IPersonService _personService;
@@ -30,12 +27,12 @@ namespace RestAspNet5.Controllers
         public IActionResult Get()
         {
 
-            return Ok(_personService.FindAll()); 
+            return Ok(_personService.FindAll());
         }
 
 
 
-        [HttpGet ("{id}")]
+        [HttpGet("{id}")]
         public IActionResult Get(long id)
         {
             var person = _personService.FindById(id);
@@ -46,7 +43,7 @@ namespace RestAspNet5.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody]  Person person)
+        public IActionResult Post([FromBody] Person person)
         {
             if (person == null) return BadRequest();
             return Ok(_personService.Create(person));
@@ -59,11 +56,11 @@ namespace RestAspNet5.Controllers
             return Ok(_personService.Update(person));
         }
 
-        [HttpGet("{id}")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(long id)
         {
             _personService.Delete(id);
-            return NoContent() ;
+            return NoContent();
         }
     }
 }
