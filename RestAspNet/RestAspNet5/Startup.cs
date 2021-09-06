@@ -15,25 +15,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RestAspNet5.Repository.Implementations;
+using Serilog;
 
 namespace RestAspNet5
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IWebHostEnvironment Environment { get; }
+        public IConfiguration Configuration { get; }
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            Environment = environment;
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 
+
             var connection = Configuration["MySqlConection:MySqlConectionString"];
             services.AddDbContext<MySqlContext>(options => options.UseMySql(connection));
 
+
+
+            if (Environment.IsDevelopment())
+            {
+                MigrateDataBase(connection);
+            }
 
 
             services.AddApiVersioning();
@@ -41,6 +56,10 @@ namespace RestAspNet5
             //injeção de dependencia!
             services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
             services.AddScoped<IPersonRepository, PersonRepositoryImplementation>();
+       
+            services.AddScoped<IBookBusiness, BookBusinessImplementation>();
+            services.AddScoped<IBookRepository, BookRepositoryImplementation>();
+
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -48,7 +67,6 @@ namespace RestAspNet5
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "RestAspNet5", Version = "v1" });
             });
         }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -70,5 +88,28 @@ namespace RestAspNet5
                 endpoints.MapControllers();
             });
         }
+
+        private void MigrateDataBase(string connection)
+        {
+
+            try
+            {
+                var evolveConection = new MySql.Data.MySqlClient.MySqlConnection(connection);
+                var envolve = new Evolve.Evolve(evolveConection, msg => Log.Information(msg))
+                {
+                    Locations = new List<string> { "db/Migrations", "db/dataset" },
+                    IsEraseDisabled = true,
+                };
+                envolve.Migrate();
+                
+            
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Migration Failed " + ex);
+                throw;
+            }
+        }
+
     }
 }
