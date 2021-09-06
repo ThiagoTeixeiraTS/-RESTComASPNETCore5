@@ -17,6 +17,9 @@ using System.Threading.Tasks;
 using RestAspNet5.Repository.Implementations;
 using Serilog;
 using RestAspNet5.Repository.Generic;
+using RestAspNet5.Hypermedia.Filters;
+using RestAspNet5.Hypermedia.Enricher;
+using Microsoft.AspNetCore.Rewrite;
 
 namespace RestAspNet5
 {
@@ -51,6 +54,12 @@ namespace RestAspNet5
                 MigrateDataBase(connection);
             }
 
+            var filterOptions = new HyperMediaFilterOptions();
+            filterOptions.ContentResponseEnricherList.Add(new PersonEnricher());
+            filterOptions.ContentResponseEnricherList.Add(new BookEnricher());
+            services.AddSingleton(filterOptions);
+
+
 
             services.AddApiVersioning();
 
@@ -65,7 +74,18 @@ namespace RestAspNet5
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "RestAspNet5", Version = "v1" });
+                c.SwaggerDoc("v1",
+                    new OpenApiInfo
+                    { 
+                        Title = "REST API's From 0 to Azure With ASP.NET Core 5 and Docker", 
+                        Version = "v1", 
+                        Description = "API RESTful developed in course 'REST API's From 0 to Azure With ASP.NET Core 5 and Docker'",
+                        Contact = new OpenApiContact
+                        {
+                            Name = "Thiago Teixeira",
+                            Url = new Uri ("https://Thiagoteixeira.net")
+                        }
+                    });
             });
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -75,8 +95,14 @@ namespace RestAspNet5
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RestAspNet5 v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json",
+                                                        "REST API's From 0 to Azure With ASP.NET Core 5 and Docker - v1"));
             }
+
+
+            var option = new RewriteOptions();
+            option.AddRedirect("^$", "swagger");
+            app.UseRewriter(option);
 
             app.UseHttpsRedirection();
 
@@ -87,6 +113,8 @@ namespace RestAspNet5
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapControllerRoute("DefaultApi", "{controller=values}/{id?}");
+
             });
         }
 
