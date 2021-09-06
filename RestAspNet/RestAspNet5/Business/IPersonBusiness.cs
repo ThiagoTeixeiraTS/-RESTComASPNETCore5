@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RestAspNet5.Business.Implementations
 {
-    public interface IPersonBusiness
+    public interface IPersonBusiness 
     {
         Person Create(Person person);
         Person FindById(long id);

@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using RestAspNet5.Repository.Implementations;
 using Serilog;
+using RestAspNet5.Repository.Generic;
 
 namespace RestAspNet5
 {
@@ -55,10 +56,10 @@ namespace RestAspNet5
 
             //injeção de dependencia!
             services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
-            services.AddScoped<IPersonRepository, PersonRepositoryImplementation>();
-       
+
             services.AddScoped<IBookBusiness, BookBusinessImplementation>();
-            services.AddScoped<IBookRepository, BookRepositoryImplementation>();
+
+            services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
 
             services.AddControllers();
@@ -101,8 +102,8 @@ namespace RestAspNet5
                     IsEraseDisabled = true,
                 };
                 envolve.Migrate();
-                
-            
+
+
             }
             catch (Exception ex)
             {
